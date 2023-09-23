@@ -20,6 +20,8 @@ const AddProducts = () => {
       return toast.error("Valid categoryId required ");
     try {
       await addProduct({ name, categoryId: selectedCategory });
+      toast.success("Scuccessfully added Product ", name);
+
       setName("");
       setSelectedCategory("");
     } catch (error) {

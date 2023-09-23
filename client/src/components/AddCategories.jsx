@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Form, Button, Dropdown } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 import { addCategory, getCategories } from "../axios";
 import { toast } from "react-toastify";
-import NestedDropdown from "./NestedDropdown";
 
 const CategoryForm = () => {
   const [state, setState] = useState({ categoryName: "", ParentCategory: "" });
