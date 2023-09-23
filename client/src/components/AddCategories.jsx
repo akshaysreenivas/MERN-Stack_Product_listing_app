@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
-import { addCategory } from "../axios";
+import React, { useEffect, useState } from "react";
+import { Form, Button, Dropdown } from "react-bootstrap";
+import { addCategory, getCategories } from "../axios";
 import { toast } from "react-toastify";
+import NestedDropdown from "./NestedDropdown";
 
-const CategoryForm = ({ categories = ["a", "b", "c"] }) => {
+const CategoryForm = () => {
   const [state, setState] = useState({ categoryName: "", ParentCategory: "" });
+  const [categories, setCategories] = useState([]);
 
   const handleInputChange = (event) => {
     setState((prevProps) => ({
@@ -12,6 +14,8 @@ const CategoryForm = ({ categories = ["a", "b", "c"] }) => {
       [event.target.name]: event.target.value,
     }));
   };
+
+  
   const handleCategoryAdd = async () => {
     if (!state.categoryName || state.categoryName.match(/^\s*$/))
       return toast.error("Valid category name required ");
@@ -26,8 +30,24 @@ const CategoryForm = ({ categories = ["a", "b", "c"] }) => {
     }
   };
 
+  const getCategory = async () => {
+    try {
+      const { data } = await getCategories (state);
+      if (data) {
+        setCategories(data)
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    getCategory()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
-    <div className="form rounded p-3 m-3 ">
+    <div className="form rounded p-3 mt-5 mx-auto">
       <h2 className="mb-3">Add Category</h2>
       <Form.Group controlId="categoryName" className="my-3 mx-2">
         <Form.Label>Category Name</Form.Label>

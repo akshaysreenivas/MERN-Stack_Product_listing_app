@@ -28,25 +28,21 @@ function createCategories(categories, parentId = null) {
 }
 
 
-
-
-
-
 module.exports.addProduct = async (req, res) => {
 	try {
 		console.log(req.body);
-		// if (!name || !categoryId) throw Error("All Fields required");
-		const categoryId = mongoose.Types.ObjectId(req.body.categoryId);
-		// // Create a new product instance
-		// const newProduct = new Product ({
-		// 	name,
-		// 	category: categoryId, // Use the ID of the category to which the product belongs
-		// });
+		if (!req.body.name || !req.body.categoryId) return res.status(400).json({ message: "All fields required" });
+		const categoryId =new mongoose.Types.ObjectId(req.body.categoryId);
+		// Create a new product instance
+		const newProduct = new Product ({
+			name:req.body.name,
+			slug: slugify(req.body.name),
+			category: categoryId, 
+		});
 
-		// // Save the new product to the database
-		// const savedProduct = await newProduct.save();
-
-		// res.status(201).json(savedProduct); // Respond with the saved product
+		// Save the new product to the database
+		const savedProduct = await newProduct.save();
+		res.status(201).json(savedProduct); 
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Server error" });
@@ -55,19 +51,11 @@ module.exports.addProduct = async (req, res) => {
 
 module.exports.getProducts = async (req, res) => {
 	try {
-		const { name, description, categoryId } = req.body;
-
-		// Create a new product instance
-		const newProduct = new Product({
-			name,
-			description,
-			category: categoryId, // Use the ID of the category to which the product belongs
-		});
-
+	
 		// Save the new product to the database
-		const savedProduct = await newProduct.save();
+		const Products = await Product.find().populate("category").lean();
 
-		res.status(201).json(savedProduct); // Respond with the saved product
+		res.status(201).json(Products); // Respond with the saved product
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Server error" });

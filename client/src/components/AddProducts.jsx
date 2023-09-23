@@ -1,67 +1,72 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { addProduct } from "../axios";
-import { Button, Form } from "react-bootstrap";
+import { addProduct, getCategories } from "../axios";
+import { Button,  Form } from "react-bootstrap";
+import NestedSelect from "./NestedDropdown";
 
-const AddProducts = ({ onSubmit }) => {
-  let categories = ["m", "k"];
-  const [state, setState] = useState({
-    name: "",
-    categoryId: "", // Assuming you have a select input for choosing the category
-  });
+const AddProducts = () => {
+  const [name, setName] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setState({
-      ...state,
-      [name]: value,
-    });
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
   };
 
   const handleSubmit = async () => {
-    if (!state.name || state.name.match(/^\s*$/))
+    if (!name || name.match(/^\s*$/))
       return toast.error("Valid product name required ");
-    if (!state.categoryId || state.categoryId.match(/^\s*$/))
+    if (!selectedCategory || selectedCategory.match(/^\s*$/))
       return toast.error("Valid categoryId required ");
     try {
-      await addProduct(state);
-      setState({ categoryName: "", ParentCategory: "" });
+      await addProduct({ name, categoryId: selectedCategory });
+      setName("");
+      setSelectedCategory("");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const getCategory = async () => {
+    try {
+      const { data } = await getCategories();
+      if (data) {
+        setCategories(data);
+      }
     } catch (error) {
       toast.error(error.message);
     }
   };
 
+  useEffect(() => {
+    getCategory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="form rounded p-3 m-3 ">
+    <div className="form rounded p-3 mt-5 mx-auto">
       <h2>Add Product</h2>
-      <div>  
+      <div>
         <Form.Group controlId="ProductName" className="my-3 mx-2">
-        <Form.Label>Product Name</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Enter Product name"
-          value={state.name}
-          name="name"
-          onChange={handleChange}
-          required
-        />
-      </Form.Group>
-        <div>
-          <label htmlFor="categoryId">Category </label>
-          <select
-            id="categoryId"
-            name="categoryId"
-            value={state.categoryId}
-            onChange={handleChange}
+          <Form.Label>Product Name</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter Product name"
+            value={name}
+            name="name"
+            onChange={(e) => setName(e.target.value)}
             required
-          >
-            <option value="">Select a Category</option>
-            {categories.map((category, index) => (
-              <option key={index} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+          />
+        </Form.Group>
+        <div>
+          <label className="mx-2" htmlFor="categoryId">
+            Category{" "}
+          </label>
+
+          <NestedSelect
+            categories={categories}
+            onChange={handleCategoryChange}
+            selectedCategory={selectedCategory}
+          />
         </div>
         <div className="mt-3  text-center">
           <Button
@@ -72,7 +77,6 @@ const AddProducts = ({ onSubmit }) => {
           >
             Add Product
           </Button>
-          
         </div>
       </div>
     </div>
